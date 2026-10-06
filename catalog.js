@@ -175,12 +175,7 @@ function renderPills() {
   });
 }
 
-let autoToggleIntervals = [];
-
 function renderGrid() {
-  autoToggleIntervals.forEach(clearInterval);
-  autoToggleIntervals = [];
-
   const q = searchEl.value.trim().toLowerCase();
   const visible = groups.filter((g) => {
     const matchesCategory = activeCategory === "All" || g.category === activeCategory;
@@ -229,10 +224,8 @@ function renderGrid() {
   }).join("");
 
   // Match each photo box's background to that photo's own background color,
-  // and swap it along with the image on hover (or, on touch devices with no
-  // hover, by auto-cycling through the photos every couple seconds).
-  const supportsHover = window.matchMedia("(hover: hover)").matches;
-
+  // and swap to the second photo on hover (mouse) or press-and-hold (touch) --
+  // scoped to whichever single card is actually being interacted with.
   gridEl.querySelectorAll(".product-visual[data-images]").forEach((vis) => {
     const images = JSON.parse(vis.dataset.images);
     if (images.length === 0) return;
@@ -256,17 +249,13 @@ function renderGrid() {
 
     if (images.length <= 1) return;
 
-    if (supportsHover) {
-      vis.addEventListener("mouseenter", () => showIndex(1));
-      vis.addEventListener("mouseleave", () => showIndex(0));
-    } else {
-      let idx = 0;
-      const intervalId = setInterval(() => {
-        idx = (idx + 1) % images.length;
-        showIndex(idx);
-      }, 2500);
-      autoToggleIntervals.push(intervalId);
-    }
+    const toSecond = () => showIndex(1);
+    const toFirst = () => showIndex(0);
+    vis.addEventListener("mouseenter", toSecond);
+    vis.addEventListener("mouseleave", toFirst);
+    vis.addEventListener("touchstart", toSecond, { passive: true });
+    vis.addEventListener("touchend", toFirst, { passive: true });
+    vis.addEventListener("touchcancel", toFirst, { passive: true });
   });
 
   // Wire up size-select -> stock text updates
