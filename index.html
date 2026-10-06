@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>SolarTech Merchandise Inventory</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="logo-white.png" alt="SolarTech" class="logo" />
+      <h1>Company Merch</h1>
+    </div>
+    <a href="admin.html">Admin</a>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div class="hero-dots" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <h2>Your One-Stop Shop for All Things <span class="hero-accent">SolarTech</span></h2>
+      <p>Request uniforms and company apparel, items for events, and other SolarTech gear. Admin reviews each request and will let you know when it's ready.</p>
+    </div>
+
+    <div id="msg" class="msg" hidden></div>
+
+    <div class="toolbar">
+      <input type="search" id="search" placeholder="Search items..." />
+    </div>
+
+    <div class="pills" id="pills"></div>
+
+    <div class="grid" id="grid">
+      <p class="empty">Loading...</p>
+    </div>
+
+    <div class="suggest-row">
+      <div class="card suggest-card">
+        <h2 style="margin-bottom:0.4rem;">Need something that's not listed?</h2>
+        <p class="request-note" style="margin-bottom:1rem;">If there's something you genuinely need for a job, event, or other business purpose that isn't in the catalog, let us know and we'll look into getting it made or stocked.</p>
+        <form id="suggest-form">
+          <div class="field">
+            <label for="suggest-name">Your name</label>
+            <input type="text" id="suggest-name" required />
+          </div>
+          <div class="field">
+            <label for="suggest-what">What are you looking for?</label>
+            <input type="text" id="suggest-what" placeholder="e.g. branded tumblers for the trade show" required />
+          </div>
+          <div class="field">
+            <label for="suggest-detail">Any additional details (optional)</label>
+            <textarea id="suggest-detail" rows="2" placeholder="Quantity, timing, event, etc."></textarea>
+          </div>
+          <button type="submit" class="btn">Send suggestion</button>
+        </form>
+      </div>
+      <div class="suggest-photo">
+        <img src="crew-rooftop.png" alt="SolarTech installation crew on a rooftop" />
+      </div>
+    </div>
+  </main>
+
+  <footer class="foot">SolarTech internal tool &mdash; for staff use.</footer>
+
+  <!-- Photo zoom -->
+  <div class="overlay" id="zoom-overlay" hidden>
+    <div class="modal zoom-modal">
+      <button type="button" class="zoom-close" id="zoom-close" aria-label="Close">&times;</button>
+      <div class="zoom-image-wrap">
+        <img id="zoom-img" src="" alt="" />
+      </div>
+      <div class="carousel-dots zoom-dots" id="zoom-dots"></div>
+      <div class="product-category" id="zoom-category"></div>
+      <div class="product-name" id="zoom-name" style="font-size:1.1rem;"></div>
+    </div>
+  </div>
+
+  <!-- Request modal -->
+  <div class="overlay" id="overlay" hidden>
+    <div class="modal">
+      <h2 id="modal-title">Request item</h2>
+      <form id="request-form">
+        <div class="field">
+          <label for="req-name">Your name</label>
+          <input type="text" id="req-name" required />
+        </div>
+        <div class="field">
+          <label for="req-qty">Quantity</label>
+          <input type="number" id="req-qty" min="1" value="1" required />
+        </div>
+        <div class="field">
+          <label for="req-note">Reason for request (optional)</label>
+          <textarea id="req-note" rows="2"></textarea>
+        </div>
+        <div class="field">
+          <label><input type="checkbox" id="req-pickup" checked /> I'll pick this up myself</label>
+        </div>
+        <div class="field" id="ship-to-field" hidden>
+          <label for="req-ship-to">Where should this be sent?</label>
+          <input type="text" id="req-ship-to" placeholder="e.g. jobsite address, office, your desk" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn secondary" id="cancel-request">Cancel</button>
+          <button type="submit" class="btn">Send request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="catalog.js"></script>
+</body>
+</html>

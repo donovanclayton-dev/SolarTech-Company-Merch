@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>SolarTech Inventory &mdash; Admin</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="logo-white.png" alt="SolarTech" class="logo" />
+      <h1>Inventory Admin</h1>
+    </div>
+    <div style="display:flex; align-items:center; gap:1.25rem;">
+      <a href="index.html">View catalog</a>
+      <a href="#" id="sign-out" style="display:none;">Sign out</a>
+    </div>
+  </header>
+
+  <main>
+    <div id="msg" class="msg" hidden></div>
+
+    <!-- Login -->
+    <section id="login-section" class="card" style="max-width:380px;">
+      <h2 style="margin-bottom:1rem;">Admin sign in</h2>
+      <form id="login-form">
+        <div class="field">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" required />
+        </div>
+        <div class="field">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" required />
+        </div>
+        <button type="submit" class="btn">Sign in</button>
+      </form>
+    </section>
+
+    <!-- Admin content -->
+    <section id="admin-section" style="display:none;">
+
+      <div class="card">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:1rem;">
+          <h2>Reorder recommendations</h2>
+          <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; color:var(--ink-soft);">
+            Minimum stock per item
+            <input type="number" id="reorder-min" min="0" value="15" style="width:70px;" />
+          </label>
+        </div>
+        <p class="request-note" style="margin-bottom:0.75rem;">Flags any item whose total stock across all sizes has fallen below the minimum.</p>
+        <table>
+          <thead>
+            <tr><th>Item</th><th>Category</th><th>Current stock</th><th>Suggested order</th></tr>
+          </thead>
+          <tbody id="reorder-rows">
+            <tr><td colspan="4" class="empty">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-bottom:1rem;">Pending requests</h2>
+        <table>
+          <thead>
+            <tr><th>Item</th><th>Size</th><th>Qty</th><th>Requested by</th><th>Delivery</th><th>Note</th><th></th></tr>
+          </thead>
+          <tbody id="request-rows">
+            <tr><td colspan="7" class="empty">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-bottom:1rem;">Add item</h2>
+        <form id="add-item-form">
+          <div class="field">
+            <label for="new-name">Name</label>
+            <input type="text" id="new-name" required />
+          </div>
+          <div class="field">
+            <label for="new-category">Category</label>
+            <input type="text" id="new-category" />
+          </div>
+          <div class="field">
+            <label for="new-size">Size (optional)</label>
+            <input type="text" id="new-size" placeholder="e.g. M, XL -- leave blank for one-size items" />
+          </div>
+          <div class="field">
+            <label for="new-qty">Starting quantity</label>
+            <input type="number" id="new-qty" min="0" value="0" required />
+          </div>
+          <div class="field">
+            <label for="new-unit">Unit</label>
+            <input type="text" id="new-unit" value="unit" />
+          </div>
+          <button type="submit" class="btn">Add item</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-bottom:1rem;">Items &amp; stock</h2>
+        <div id="item-groups"><p class="empty">Loading...</p></div>
+      </div>
+
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
