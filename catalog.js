@@ -175,7 +175,12 @@ function renderPills() {
   });
 }
 
+let autoToggleIntervals = [];
+
 function renderGrid() {
+  autoToggleIntervals.forEach(clearInterval);
+  autoToggleIntervals = [];
+
   const q = searchEl.value.trim().toLowerCase();
   const visible = groups.filter((g) => {
     const matchesCategory = activeCategory === "All" || g.category === activeCategory;
@@ -224,7 +229,10 @@ function renderGrid() {
   }).join("");
 
   // Match each photo box's background to that photo's own background color,
-  // and swap it along with the image on hover.
+  // and swap it along with the image on hover (or, on touch devices with no
+  // hover, by auto-cycling through the photos every couple seconds).
+  const supportsHover = window.matchMedia("(hover: hover)").matches;
+
   gridEl.querySelectorAll(".product-visual[data-images]").forEach((vis) => {
     const images = JSON.parse(vis.dataset.images);
     if (images.length === 0) return;
@@ -232,26 +240,33 @@ function renderGrid() {
     const dots = vis.querySelectorAll(".carousel-dot");
     const colors = {};
 
-    sampleImageColor(images[0]).then((color) => {
-      if (!color) return;
-      colors[0] = color;
-      vis.style.background = color;
+    const showIndex = (i) => {
+      imgEl.src = images[i];
+      if (colors[i]) vis.style.background = colors[i];
+      dots.forEach((d, di) => d.classList.toggle("active", di === i));
+    };
+
+    images.forEach((url, i) => {
+      sampleImageColor(url).then((color) => {
+        if (!color) return;
+        colors[i] = color;
+        if (i === 0) vis.style.background = color;
+      });
     });
-    if (images.length > 1) {
-      sampleImageColor(images[1]).then((color) => { if (color) colors[1] = color; });
-    }
 
     if (images.length <= 1) return;
-    vis.addEventListener("mouseenter", () => {
-      imgEl.src = images[1];
-      if (colors[1]) vis.style.background = colors[1];
-      dots.forEach((d, di) => d.classList.toggle("active", di === 1));
-    });
-    vis.addEventListener("mouseleave", () => {
-      imgEl.src = images[0];
-      if (colors[0]) vis.style.background = colors[0];
-      dots.forEach((d, di) => d.classList.toggle("active", di === 0));
-    });
+
+    if (supportsHover) {
+      vis.addEventListener("mouseenter", () => showIndex(1));
+      vis.addEventListener("mouseleave", () => showIndex(0));
+    } else {
+      let idx = 0;
+      const intervalId = setInterval(() => {
+        idx = (idx + 1) % images.length;
+        showIndex(idx);
+      }, 2500);
+      autoToggleIntervals.push(intervalId);
+    }
   });
 
   // Wire up size-select -> stock text updates
