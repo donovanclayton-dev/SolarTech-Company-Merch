@@ -28,10 +28,15 @@ function sizeIndex(size) {
 
 // --- Auth ---
 
+const loginEmailInput = document.getElementById("login-email");
+const savedAdminEmail = localStorage.getItem("st-inventory-admin-email");
+if (savedAdminEmail) loginEmailInput.value = savedAdminEmail;
+
 document.getElementById("login-form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const email = document.getElementById("login-email").value.trim();
+  const email = loginEmailInput.value.trim();
   const password = document.getElementById("login-password").value;
+  localStorage.setItem("st-inventory-admin-email", email);
   const { error } = await sb.auth.signInWithPassword({ email, password });
   if (error) {
     showMessage("Sign in failed: " + error.message, "error");
