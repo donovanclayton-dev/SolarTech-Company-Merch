@@ -140,6 +140,19 @@ function sizeIndex(size) {
 
 const STANDARD_SIZES = ["S", "M", "L", "XL", "XXL", "3XL"];
 
+// Broad pill groups shown at the top of the page. Each item's actual
+// `category` (e.g. "Hats", "Polos (Men's)") still shows on its card --
+// this just buckets categories together for filtering.
+const PILL_GROUPS = ["SolarTech Clothing", "SolarTech Swag", "SolarTech Banners/Other"];
+const CLOTHING_CATEGORIES = ["Hats", "Outerwear", "Polos (Men's)", "Polos (Women's)", "Shirts", "Tank Tops"];
+
+function categoryGroup(category) {
+  if (PILL_GROUPS.includes(category)) return category;
+  if (CLOTHING_CATEGORIES.includes(category)) return "SolarTech Clothing";
+  if (/banner|sign/i.test(category)) return "SolarTech Banners/Other";
+  return "SolarTech Swag";
+}
+
 function groupItems(items, imagesMap) {
   const map = new Map();
   for (const item of items) {
@@ -236,11 +249,14 @@ function wireProductActions(scopeEl, group, opts = {}) {
 
 function renderPills() {
   const counts = new Map();
-  for (const g of groups) counts.set(g.category, (counts.get(g.category) || 0) + 1);
-  const categories = ["All", ...Array.from(counts.keys()).sort()];
+  for (const g of groups) {
+    const group = categoryGroup(g.category);
+    counts.set(group, (counts.get(group) || 0) + 1);
+  }
+  const categories = ["All", ...PILL_GROUPS];
 
   pillsEl.innerHTML = categories.map((cat) => {
-    const count = cat === "All" ? groups.length : counts.get(cat);
+    const count = cat === "All" ? groups.length : (counts.get(cat) || 0);
     return `<button class="pill ${cat === activeCategory ? "active" : ""}" data-cat="${escapeHtml(cat)}">${escapeHtml(cat)} <span class="count">${count}</span></button>`;
   }).join("");
 
@@ -256,7 +272,7 @@ function renderPills() {
 function renderGrid() {
   const q = searchEl.value.trim().toLowerCase();
   const visible = groups.filter((g) => {
-    const matchesCategory = activeCategory === "All" || g.category === activeCategory;
+    const matchesCategory = activeCategory === "All" || categoryGroup(g.category) === activeCategory;
     const matchesSearch = !q || g.name.toLowerCase().includes(q) || g.category.toLowerCase().includes(q);
     return matchesCategory && matchesSearch;
   });
