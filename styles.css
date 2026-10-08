@@ -329,9 +329,8 @@ footer.foot a { color: var(--ink-soft); }
   overflow: hidden;
   margin-bottom: 1.75rem;
   background:
-    radial-gradient(ellipse at center, rgba(12, 31, 55, 0) 35%, rgba(12, 31, 55, 0.75) 100%),
-    linear-gradient(135deg, rgba(24, 62, 109, 0.82), rgba(12, 31, 55, 0.88)),
-    url("hero-bg.png") center / cover no-repeat;
+    linear-gradient(rgba(12, 31, 55, 0.55), rgba(12, 31, 55, 0.55)),
+    url("crew-rooftop.png") center 28% / cover no-repeat;
   box-shadow: var(--shadow-md);
 }
 .hero-inner {
