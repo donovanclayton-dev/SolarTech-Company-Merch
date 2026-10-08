@@ -422,8 +422,8 @@ footer.foot a { color: var(--ink-soft); }
 .product-controls input[type="number"] { flex: 0.7; min-width: 0; }
 .field-notice {
   font-size: 0.8rem;
-  color: var(--bad);
-  background: #fbe9e5;
+  color: var(--ink-soft);
+  background: var(--line);
   padding: 0.45rem 0.6rem;
   border-radius: var(--r-sm);
   text-align: center;
