@@ -62,4 +62,4 @@ insert into items (name, category, size, quantity, unit) values
 
   ('Black Hat', 'Hats', null, 5, 'unit'),
   ('Navy Hat', 'Hats', null, 5, 'unit'),
-  ('Employee White Hat', 'Hats', null, 5, 'unit');
+  ('Enphase White Hat', 'Hats', null, 5, 'unit');
