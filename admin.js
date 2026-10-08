@@ -159,6 +159,11 @@ async function loadItems() {
               </td>
             </tr>
           `).join("")}
+          <tr class="add-size-row">
+            <td><input type="text" class="add-size-input" placeholder="Size (optional)" style="max-width:110px;" /></td>
+            <td style="max-width:110px;"><input type="number" min="0" value="0" class="add-qty-input" /></td>
+            <td style="white-space:nowrap;"><button class="btn secondary add-size">Add size</button></td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -169,6 +174,25 @@ async function loadItems() {
     const fileInput = block.querySelector(".photo-input");
     const addWrap = block.querySelector(".thumb-add-wrap");
     const previewNote = block.querySelector(".preview-note");
+
+    block.querySelector(".add-size").addEventListener("click", async () => {
+      const sizeInput = block.querySelector(".add-size-input");
+      const qtyInput = block.querySelector(".add-qty-input");
+      const size = sizeInput.value.trim();
+      const quantity = parseInt(qtyInput.value, 10) || 0;
+      const unit = g.variants[0]?.unit || "unit";
+
+      const { error } = await sb.from("items").insert({
+        name: g.name,
+        category: g.category || null,
+        size: size || null,
+        quantity,
+        unit,
+      });
+
+      if (error) showMessage("Could not add size: " + error.message, "error");
+      else { showMessage("Size added.", "success"); loadItems(); }
+    });
 
     fileInput.addEventListener("change", () => {
       const file = fileInput.files[0];
