@@ -68,12 +68,21 @@
   <div class="overlay" id="zoom-overlay" hidden>
     <div class="modal zoom-modal">
       <button type="button" class="zoom-close" id="zoom-close" aria-label="Close">&times;</button>
-      <div class="zoom-image-wrap">
-        <img id="zoom-img" src="" alt="" />
+      <div class="zoom-body">
+        <div class="zoom-media">
+          <div class="zoom-image-wrap">
+            <button type="button" class="zoom-arrow zoom-arrow-prev" id="zoom-prev" aria-label="Previous photo">&#8249;</button>
+            <img id="zoom-img" src="" alt="" />
+            <button type="button" class="zoom-arrow zoom-arrow-next" id="zoom-next" aria-label="Next photo">&#8250;</button>
+          </div>
+          <div class="carousel-dots zoom-dots" id="zoom-dots"></div>
+        </div>
+        <div class="zoom-details">
+          <div class="product-category" id="zoom-category"></div>
+          <div class="product-name" id="zoom-name" style="font-size:1.1rem;"></div>
+          <div id="zoom-actions"></div>
+        </div>
       </div>
-      <div class="carousel-dots zoom-dots" id="zoom-dots"></div>
-      <div class="product-category" id="zoom-category"></div>
-      <div class="product-name" id="zoom-name" style="font-size:1.1rem;"></div>
     </div>
   </div>
 

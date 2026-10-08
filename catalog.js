@@ -82,15 +82,20 @@ const zoomImg = document.getElementById("zoom-img");
 const zoomDots = document.getElementById("zoom-dots");
 const zoomCategory = document.getElementById("zoom-category");
 const zoomName = document.getElementById("zoom-name");
+const zoomActions = document.getElementById("zoom-actions");
+const zoomPrev = document.getElementById("zoom-prev");
+const zoomNext = document.getElementById("zoom-next");
 
 function openZoom(group) {
   const images = group.images;
   if (images.length === 0) return;
 
+  let current = 0;
+
   function show(i) {
-    const index = (i + images.length) % images.length;
-    zoomImg.src = images[index];
-    zoomDots.querySelectorAll(".carousel-dot").forEach((d, di) => d.classList.toggle("active", di === index));
+    current = (i + images.length) % images.length;
+    zoomImg.src = images[current];
+    zoomDots.querySelectorAll(".carousel-dot").forEach((d, di) => d.classList.toggle("active", di === current));
   }
 
   zoomCategory.textContent = group.category;
@@ -99,6 +104,13 @@ function openZoom(group) {
     ? images.map((_, i) => `<span class="carousel-dot ${i === 0 ? "active" : ""}"></span>`).join("")
     : "";
   zoomDots.querySelectorAll(".carousel-dot").forEach((dot, i) => dot.addEventListener("click", () => show(i)));
+
+  zoomPrev.hidden = zoomNext.hidden = images.length <= 1;
+  zoomPrev.onclick = () => show(current - 1);
+  zoomNext.onclick = () => show(current + 1);
+
+  zoomActions.innerHTML = productActionsHTML(group);
+  wireProductActions(zoomActions, group, { onRequestOpen: () => { zoomOverlay.hidden = true; } });
 
   show(0);
   zoomOverlay.hidden = false;
@@ -156,6 +168,72 @@ function stockLabel(qty) {
   return `${qty} in stock`;
 }
 
+function productActionsHTML(g) {
+  const hasSizes = g.variants.length > 1 || g.variants[0].size;
+  const totalQty = g.variants.reduce((sum, v) => sum + v.quantity, 0);
+  const groupKey = g.category + "||" + g.name;
+
+  const controls = hasSizes
+    ? `<select class="size-select" data-group="${escapeHtml(groupKey)}">
+        <option value="" disabled selected>Select a size</option>
+        ${g.variants.map((v) => `<option value="${v.id ?? ""}" ${v.quantity <= 0 ? "disabled" : ""}>${escapeHtml(v.size || "One size")}${v.quantity <= 0 ? " (out)" : ""}</option>`).join("")}
+      </select>
+      <input type="number" min="1" value="1" class="req-qty-input" />`
+    : `<input type="number" min="1" value="1" class="req-qty-input" />`;
+
+  const stock = hasSizes
+    ? `<div class="product-stock stock-text" data-group="${escapeHtml(groupKey)}">Select a size to see stock</div>`
+    : `<div class="product-stock">${stockLabel(totalQty)}</div>`;
+
+  return `
+    ${stock}
+    <div class="product-controls">${controls}</div>
+    <button class="btn request-btn">Request</button>
+    <div class="field-notice" hidden></div>
+  `;
+}
+
+function wireProductActions(scopeEl, group, opts = {}) {
+  const select = scopeEl.querySelector(".size-select");
+  const stockEl = scopeEl.querySelector(".stock-text");
+
+  if (select) {
+    select.addEventListener("change", () => {
+      if (!select.value) {
+        if (stockEl) stockEl.textContent = "Select a size to see stock";
+        return;
+      }
+      const variant = group.variants.find((v) => (v.id ?? "") === select.value);
+      if (stockEl && variant) stockEl.innerHTML = stockLabel(variant.quantity);
+    });
+  }
+
+  const notice = scopeEl.querySelector(".field-notice");
+  let noticeTimer = null;
+  const showNotice = (text) => {
+    if (!notice) return;
+    notice.textContent = text;
+    notice.hidden = false;
+    clearTimeout(noticeTimer);
+    noticeTimer = setTimeout(() => { notice.hidden = true; }, 2500);
+  };
+
+  scopeEl.querySelector(".request-btn").addEventListener("click", () => {
+    if (select && !select.value) {
+      showNotice("Please select a size.");
+      return;
+    }
+    const variant = select ? group.variants.find((v) => (v.id ?? "") === select.value) : group.variants[0];
+    if (!variant || variant.quantity <= 0) {
+      showNotice("That size is out of stock.");
+      return;
+    }
+    const qtyInput = scopeEl.querySelector(".req-qty-input");
+    if (opts.onRequestOpen) opts.onRequestOpen();
+    openRequestModal(group, variant, parseInt(qtyInput.value, 10) || 1);
+  });
+}
+
 function renderPills() {
   const counts = new Map();
   for (const g of groups) counts.set(g.category, (counts.get(g.category) || 0) + 1);
@@ -194,31 +272,13 @@ function renderGrid() {
       ? `<img class="carousel-img" src="${escapeHtml(g.images[0])}" alt="${escapeHtml(g.name)}" />
          ${g.images.length > 1 ? `<div class="carousel-dots">${g.images.map((_, i) => `<span class="carousel-dot ${i === 0 ? "active" : ""}"></span>`).join("")}</div>` : ""}`
       : (ICONS[g.category] || ICONS.default);
-    const hasSizes = g.variants.length > 1 || g.variants[0].size;
-    const totalQty = g.variants.reduce((sum, v) => sum + v.quantity, 0);
-
-    const controls = hasSizes
-      ? `<select class="size-select" data-group="${escapeHtml(g.category + "||" + g.name)}">
-          <option value="" disabled selected>Select a size</option>
-          ${g.variants.map((v) => `<option value="${v.id ?? ""}" ${v.quantity <= 0 ? "disabled" : ""}>${escapeHtml(v.size || "One size")}${v.quantity <= 0 ? " (out)" : ""}</option>`).join("")}
-        </select>
-        <input type="number" min="1" value="1" class="req-qty-input" />`
-      : `<input type="number" min="1" value="1" class="req-qty-input" />`;
-
-    const stock = hasSizes
-      ? `<div class="product-stock stock-text" data-group="${escapeHtml(g.category + "||" + g.name)}">Select a size to see stock</div>`
-      : `<div class="product-stock">${stockLabel(totalQty)}</div>`;
-
     return `
       <div class="product-card" data-key="${escapeHtml(g.category + "||" + g.name)}">
         <div class="product-visual ${hasPhotos ? "has-photo" : ""}" data-images='${escapeHtml(JSON.stringify(g.images))}' data-index="0">${visual}</div>
         <div class="product-body">
           <div class="product-category">${escapeHtml(g.category)}</div>
           <div class="product-name">${escapeHtml(g.name)}</div>
-          ${stock}
-          <div class="product-controls">${controls}</div>
-          <button class="btn request-btn">Request</button>
-          <div class="field-notice" hidden></div>
+          ${productActionsHTML(g)}
         </div>
       </div>
     `;
@@ -259,21 +319,7 @@ function renderGrid() {
     vis.addEventListener("touchcancel", toFirst, { passive: true });
   });
 
-  // Wire up size-select -> stock text updates
-  gridEl.querySelectorAll(".size-select").forEach((select) => {
-    select.addEventListener("change", () => {
-      const stockEl = gridEl.querySelector(`.stock-text[data-group="${CSS.escape(select.dataset.group)}"]`);
-      if (!select.value) {
-        if (stockEl) stockEl.textContent = "Select a size to see stock";
-        return;
-      }
-      const group = groups.find((g) => (g.category + "||" + g.name) === select.dataset.group);
-      const variant = group.variants.find((v) => (v.id ?? "") === select.value);
-      if (stockEl && variant) stockEl.innerHTML = stockLabel(variant.quantity);
-    });
-  });
-
-  // Wire up Request buttons and click-to-zoom
+  // Wire up Request buttons, size-selects, and click-to-zoom
   gridEl.querySelectorAll(".product-card").forEach((card) => {
     const key = card.dataset.key;
     const group = groups.find((g) => (g.category + "||" + g.name) === key);
@@ -284,30 +330,7 @@ function renderGrid() {
       visualEl.addEventListener("click", () => openZoom(group));
     }
 
-    const notice = card.querySelector(".field-notice");
-    let noticeTimer = null;
-    const showNotice = (text) => {
-      if (!notice) return;
-      notice.textContent = text;
-      notice.hidden = false;
-      clearTimeout(noticeTimer);
-      noticeTimer = setTimeout(() => { notice.hidden = true; }, 2500);
-    };
-
-    card.querySelector(".request-btn").addEventListener("click", () => {
-      const select = card.querySelector(".size-select");
-      if (select && !select.value) {
-        showNotice("Please select a size.");
-        return;
-      }
-      const variant = select ? group.variants.find((v) => (v.id ?? "") === select.value) : group.variants[0];
-      if (!variant || variant.quantity <= 0) {
-        showNotice("That size is out of stock.");
-        return;
-      }
-      const qtyInput = card.querySelector(".req-qty-input");
-      openRequestModal(group, variant, parseInt(qtyInput.value, 10) || 1);
-    });
+    wireProductActions(card, group);
   });
 }
 
