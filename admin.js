@@ -160,7 +160,12 @@ async function loadItems() {
             </tr>
           `).join("")}
           <tr class="add-size-row">
-            <td><input type="text" class="add-size-input" placeholder="Size (optional)" style="max-width:110px;" /></td>
+            <td>
+              <select class="add-size-input" style="max-width:110px;">
+                <option value="" disabled selected>Size</option>
+                ${["S", "M", "L", "XL", "XXL", "3XL"].map((s) => `<option value="${s}">${s}</option>`).join("")}
+              </select>
+            </td>
             <td style="max-width:110px;"><input type="number" min="0" value="0" class="add-qty-input" /></td>
             <td style="white-space:nowrap;"><button class="btn secondary add-size">Add size</button></td>
           </tr>
@@ -178,14 +183,15 @@ async function loadItems() {
     block.querySelector(".add-size").addEventListener("click", async () => {
       const sizeInput = block.querySelector(".add-size-input");
       const qtyInput = block.querySelector(".add-qty-input");
-      const size = sizeInput.value.trim();
+      const size = sizeInput.value;
+      if (!size) { showMessage("Choose a size first.", "error"); return; }
       const quantity = parseInt(qtyInput.value, 10) || 0;
       const unit = g.variants[0]?.unit || "unit";
 
       const { error } = await sb.from("items").insert({
         name: g.name,
         category: g.category || null,
-        size: size || null,
+        size,
         quantity,
         unit,
       });
