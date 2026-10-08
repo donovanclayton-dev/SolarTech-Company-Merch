@@ -78,11 +78,19 @@ function groupItems(items, imagesMap) {
 
 let lastGroups = [];
 
+// Reorder suggestions only make sense for clothing (sizes run out per-size);
+// swag/banners items aren't restocked the same way, so skip them here.
+const CLOTHING_CATEGORIES = ["Hats", "Outerwear", "Polos (Men's)", "Polos (Women's)", "Shirts", "Tank Tops", "SolarTech Clothing"];
+function isClothing(category) {
+  return CLOTHING_CATEGORIES.includes(category);
+}
+
 function renderReorder() {
   const rowsEl = document.getElementById("reorder-rows");
   const min = parseInt(document.getElementById("reorder-min").value, 10) || 0;
 
   const low = lastGroups
+    .filter((g) => isClothing(g.category))
     .map((g) => ({ ...g, total: g.variants.reduce((sum, v) => sum + v.quantity, 0) }))
     .filter((g) => g.total < min)
     .sort((a, b) => (min - b.total) - (min - a.total));
