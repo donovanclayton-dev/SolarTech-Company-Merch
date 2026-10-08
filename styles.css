@@ -230,7 +230,7 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
   justify-content: center;
   z-index: 2;
 }
-.zoom-arrow:hover { background: rgba(12, 31, 55, 0.55); }
+.zoom-arrow:hover { background: rgba(12, 31, 55, 0.72); }
 .zoom-arrow[hidden] { display: none; }
 .zoom-arrow-prev { left: 8px; }
 .zoom-arrow-next { right: 8px; }
@@ -329,7 +329,7 @@ footer.foot a { color: var(--ink-soft); }
   overflow: hidden;
   margin-bottom: 1.75rem;
   background:
-    linear-gradient(rgba(12, 31, 55, 0.55), rgba(12, 31, 55, 0.55)),
+    linear-gradient(rgba(12, 31, 55, 0.72), rgba(12, 31, 55, 0.72)),
     url("crew-rooftop.png") center 28% / cover no-repeat;
   box-shadow: var(--shadow-md);
 }
