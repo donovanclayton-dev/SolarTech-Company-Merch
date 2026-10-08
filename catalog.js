@@ -218,6 +218,7 @@ function renderGrid() {
           ${stock}
           <div class="product-controls">${controls}</div>
           <button class="btn request-btn">Request</button>
+          <div class="field-notice" hidden></div>
         </div>
       </div>
     `;
@@ -283,15 +284,25 @@ function renderGrid() {
       visualEl.addEventListener("click", () => openZoom(group));
     }
 
+    const notice = card.querySelector(".field-notice");
+    let noticeTimer = null;
+    const showNotice = (text) => {
+      if (!notice) return;
+      notice.textContent = text;
+      notice.hidden = false;
+      clearTimeout(noticeTimer);
+      noticeTimer = setTimeout(() => { notice.hidden = true; }, 2500);
+    };
+
     card.querySelector(".request-btn").addEventListener("click", () => {
       const select = card.querySelector(".size-select");
       if (select && !select.value) {
-        showMessage("Please select a size.", "error");
+        showNotice("Please select a size.");
         return;
       }
       const variant = select ? group.variants.find((v) => (v.id ?? "") === select.value) : group.variants[0];
       if (!variant || variant.quantity <= 0) {
-        showMessage("That size is out of stock.", "error");
+        showNotice("That size is out of stock.");
         return;
       }
       const qtyInput = card.querySelector(".req-qty-input");
